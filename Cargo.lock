@@ -372,6 +372,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "92773504d58c093f6de2459af4af33faa518c13451eb8f2b5698ed3d36e7c813"
 
 [[package]]
+name = "ec-uns-cmd"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "clap",
+ "edgecommons",
+ "serde_json",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+]
+
+[[package]]
 name = "edgecommons"
 version = "0.3.0"
 dependencies = [
@@ -2385,20 +2399,6 @@ name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
-
-[[package]]
-name = "uns-cmd"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "edgecommons",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "tracing-subscriber",
-]
 
 [[package]]
 name = "untrusted"

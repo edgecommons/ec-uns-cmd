@@ -7,10 +7,10 @@
 //!
 //! When a broker is up it stands up ONE EdgeCommons runtime (a real component with the
 //! library-owned `commands()` inbox — `ping`/`describe`/`status` answer for free) and, using
-//! the SAME request path the `uns-cmd` binary uses, sends `ping` and `describe` to that
+//! the SAME request path the `ec-uns-cmd` binary uses, sends `ping` and `describe` to that
 //! component's OWN inbox and asserts the `{ok:true, result}` reply. `receiveOwnMessages`
 //! defaults true, so a single runtime is both requester and responder — a self-contained,
-//! broker-only proof of the protobuf request/reply wire and of `uns_cmd`'s topic + reply
+//! broker-only proof of the protobuf request/reply wire and of `ec_uns_cmd`'s topic + reply
 //! logic.
 
 use std::net::{TcpStream, ToSocketAddrs};
@@ -22,10 +22,10 @@ use edgecommons::messaging::message::MessageBuilder;
 use serde_json::{Value, json};
 use tempfile::NamedTempFile;
 
-use uns_cmd::{ReplyOutcome, client_config_doc, cmd_topic, interpret_reply, messaging_config_doc};
+use ec_uns_cmd::{ReplyOutcome, client_config_doc, cmd_topic, interpret_reply, messaging_config_doc};
 
-const TEST_DEVICE: &str = "uns-cmd-test";
-const TEST_COMPONENT: &str = "uns-cmd-selftest";
+const TEST_DEVICE: &str = "ec-uns-cmd-test";
+const TEST_COMPONENT: &str = "ec-uns-cmd-selftest";
 
 fn broker_addr() -> String {
     std::env::var("UNS_CMD_TEST_BROKER").unwrap_or_else(|_| "localhost:1883".to_string())
@@ -66,14 +66,14 @@ async fn ping_and_describe_roundtrip_over_the_bus() {
         host_port[0].parse::<u16>().unwrap_or(1883),
         host_port.get(1).copied().unwrap_or("localhost"),
     );
-    let broker = uns_cmd::Broker {
+    let broker = ec_uns_cmd::Broker {
         host: host.to_string(),
         port,
     };
 
     let messaging_doc = messaging_config_doc(
         &broker,
-        &format!("uns-cmd-selftest-{}", std::process::id()),
+        &format!("ec-uns-cmd-selftest-{}", std::process::id()),
         false,
         None,
         None,
@@ -84,7 +84,7 @@ async fn ping_and_describe_roundtrip_over_the_bus() {
     let client_cfg = write_temp(&client_doc);
 
     let argv: Vec<String> = vec![
-        "uns-cmd-selftest".into(),
+        "ec-uns-cmd-selftest".into(),
         "--platform".into(),
         "HOST".into(),
         "--transport".into(),
@@ -98,7 +98,7 @@ async fn ping_and_describe_roundtrip_over_the_bus() {
     ];
 
     let gg = Arc::new(
-        EdgeCommonsBuilder::new("uns-cmd-selftest")
+        EdgeCommonsBuilder::new("ec-uns-cmd-selftest")
             .args(argv)
             .build()
             .await

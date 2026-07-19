@@ -1,11 +1,11 @@
-# uns-cmd — EdgeCommons UNS command tool
+# ec-uns-cmd — EdgeCommons UNS command tool
 
-`uns-cmd` sends a command to any EdgeCommons component's `cmd` inbox over the Unified Namespace
+`ec-uns-cmd` sends a command to any EdgeCommons component's `cmd` inbox over the Unified Namespace
 (UNS) and prints the correlated reply. It is a general ecosystem utility: every EdgeCommons
 component has a library-owned `commands()` inbox, so one tool drives them all.
 
 The UNS `cmd` wire is a protobuf (prost) envelope, so operators and tests cannot drive a
-component's commands with raw JSON over MQTT. `uns-cmd` builds the proper protobuf `cmd/{verb}`
+component's commands with raw JSON over MQTT. `ec-uns-cmd` builds the proper protobuf `cmd/{verb}`
 request envelope through the EdgeCommons library, publishes it on the component's UNS command
 topic, awaits the correlated reply within a deadline, and prints the reply's `result` (or
 `error`) as JSON.
@@ -28,12 +28,12 @@ It works for arbitrary verbs and arbitrary JSON bodies — the library built-ins
 
 ## Install
 
-`uns-cmd` is a Rust binary crate. It depends on the EdgeCommons Rust library by a pinned git
+`ec-uns-cmd` is a Rust binary crate. It depends on the EdgeCommons Rust library by a pinned git
 revision.
 
 ```bash
 cargo build --release
-# binary at target/release/uns-cmd
+# binary at target/release/ec-uns-cmd
 ```
 
 For local development against a sibling `edgecommons` checkout, create a gitignored
@@ -51,7 +51,7 @@ git-fetch-with-cli = true
 ## Usage
 
 ```text
-uns-cmd --broker <host:port> [--tls --ca <ca.pem> --cert <c.pem> --key <k.pem>] \
+ec-uns-cmd --broker <host:port> [--tls --ca <ca.pem> --cert <c.pem> --key <k.pem>] \
         --device <device> --component <component> [--instance <instance>] \
         <verb> [--body '<json>'] [--timeout <secs>] [--json]
 ```
@@ -63,64 +63,64 @@ Every flag is documented in [`docs/reference/cli.md`](docs/reference/cli.md).
 Ask a component if it is responsive and read its uptime:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter ping
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter ping
 # { "status": "RUNNING", "uptimeSecs": 43 }
 ```
 
 Discover a component's verbs and console panels:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter describe
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter describe
 # { "commands": [ { "verb": "sb/status", "builtIn": false }, … ], "panels": { … } }
 ```
 
 Query a southbound adapter's instance status:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/status
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/status
 # { "id": "filler-plc", "mode": "poll", "connected": true, "state": "ONLINE", "paused": false, … }
 ```
 
 Pause and resume an adapter's telemetry production:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/pause
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/pause
 # { "id": "filler-plc", "paused": true, "changed": true }
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/resume
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/resume
 # { "id": "filler-plc", "paused": false, "changed": true }
 ```
 
 On-demand read of live values:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
         sb/read --body '{"signals":[{"name":"line-speed"},{"name":"tank-level"}]}'
 ```
 
 Confirmed, allow-listed write (a non-allow-listed signal is refused inline):
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
         sb/write --body '{"writes":[{"tagPath":"FILL_SETPOINT","type":"real","value":55.5}]}'
 ```
 
 Target one instance of a multi-instance component by the topic instance slot:
 
 ```bash
-uns-cmd --broker localhost:1883 --device gw-01 --component opcua-adapter --instance kep1 ping
+ec-uns-cmd --broker localhost:1883 --device gw-01 --component opcua-adapter --instance kep1 ping
 ```
 
 ## How it fits the ecosystem
 
 - **UNS command surface.** EdgeCommons components expose commands as request/reply verbs on their
   `cmd` inbox at `ecv1/{device}/{component}[/{instance}]/cmd/{verb}`. The reply body is
-  `{"ok": true, "result": …}` or `{"ok": false, "error": {"code", "message"}}`. `uns-cmd` speaks
+  `{"ok": true, "result": …}` or `{"ok": false, "error": {"code", "message"}}`. `ec-uns-cmd` speaks
   exactly that contract.
 - **The same request path the console uses.** The tool mirrors the edge-console command gateway:
   build the topic with the library's UNS builder, build the envelope with `MessageBuilder`,
   `request_with_timeout`, and interpret the `{ok, result|error}` reply.
 - **Scriptable and CI-friendly.** stdout carries only the reply JSON (logs go to stderr); the
-  process exit code reflects the outcome, so `uns-cmd` slots into shell pipelines and end-to-end
+  process exit code reflects the outcome, so `ec-uns-cmd` slots into shell pipelines and end-to-end
   tests that need to drive a component's command surface over the real bus.
 
 ## Exit codes

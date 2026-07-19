@@ -1,6 +1,6 @@
-# uns-cmd — tool notes (Claude Code)
+# ec-uns-cmd — tool notes (Claude Code)
 
-EdgeCommons **UNS command-line tool** (Rust). Repo/crate/bin `uns-cmd`. Depends on the
+EdgeCommons **UNS command-line tool** (Rust). Repo/crate/bin `ec-uns-cmd`. Depends on the
 `edgecommons` Rust library. Read the org umbrella `../CLAUDE.md` first (platform matrix, validation
 infra, local-dev sibling override).
 

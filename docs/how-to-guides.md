@@ -1,6 +1,6 @@
 # How-to guides
 
-Task recipes for `uns-cmd`. Each assumes a broker at `localhost:1883` and a target component. Adjust
+Task recipes for `ec-uns-cmd`. Each assumes a broker at `localhost:1883` and a target component. Adjust
 `--device` and `--component` to your target.
 
 ## Send a verb with a JSON body
@@ -8,7 +8,7 @@ Task recipes for `uns-cmd`. Each assumes a broker at `localhost:1883` and a targ
 Pass the request arguments as a JSON object with `--body`:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
         sb/read --body '{"signals":[{"name":"line-speed"},{"name":"tank-level"}]}'
 ```
 
@@ -17,7 +17,7 @@ The body must be a JSON object. Verbs that take no arguments need no `--body` (i
 ## Read live signal values
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
         sb/read --body '{"signals":[{"name":"line-speed"}]}'
 ```
 
@@ -37,7 +37,7 @@ A write to an allow-listed signal is confirmed; a write to a signal outside the 
 `writes.allow` list is refused inline:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
         sb/write --body '{"writes":[
           {"tagPath":"FILL_SETPOINT","type":"real","value":55.5},
           {"tagPath":"LINE_SPEED","type":"real","value":10.0}
@@ -56,7 +56,7 @@ uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-ada
 ```
 
 When every entry is refused, the whole command fails with error code `WRITE_NOT_ALLOWED` and
-`uns-cmd` exits `1`.
+`ec-uns-cmd` exits `1`.
 
 ## Pause and resume an adapter
 
@@ -65,10 +65,10 @@ Pausing an adapter suspends its telemetry production; its `data` topics go quiet
 whether the state actually changed):
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/pause
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/pause
 # { "id": "filler-plc", "paused": true, "changed": true }
 
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/resume
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/resume
 # { "id": "filler-plc", "paused": false, "changed": true }
 ```
 
@@ -78,7 +78,7 @@ uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-ada
 `ecv1/{device}/{component}/{instance}/cmd/{verb}`:
 
 ```bash
-uns-cmd --broker localhost:1883 --device gw-01 --component opcua-adapter --instance kep1 ping
+ec-uns-cmd --broker localhost:1883 --device gw-01 --component opcua-adapter --instance kep1 ping
 ```
 
 Some adapters (including `ethernet-ip-adapter`) instead route by an `"instance"` field in the body
@@ -91,7 +91,7 @@ Supply the CA (and, for mutual TLS, the client cert and key). The port defaults 
 `--tls`:
 
 ```bash
-uns-cmd --broker mybroker:8883 --tls --ca ca.pem --cert client.pem --key client.key \
+ec-uns-cmd --broker mybroker:8883 --tls --ca ca.pem --cert client.pem --key client.key \
         --device plant-line1 --component ethernet-ip-adapter ping
 ```
 
@@ -101,17 +101,17 @@ Instead of `--broker`/`--tls`, point at an existing edgecommons messaging config
 `{"messaging":{"local":{…}}}` document):
 
 ```bash
-uns-cmd --config ./standalone-messaging.json \
+ec-uns-cmd --config ./standalone-messaging.json \
         --device plant-line1 --component ethernet-ip-adapter ping
 ```
 
 ## Use it in a test or pipeline
 
 stdout carries only the reply JSON (logs go to stderr), and the exit code reflects the outcome, so
-`uns-cmd` composes with `jq` and shell conditionals:
+`ec-uns-cmd` composes with `jq` and shell conditionals:
 
 ```bash
-state=$(uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
+state=$(ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter \
                 sb/status | jq -r '.state')
 [ "$state" = "ONLINE" ] || { echo "adapter not online: $state"; exit 1; }
 ```

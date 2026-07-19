@@ -1,6 +1,6 @@
-# uns-cmd — tool notes
+# ec-uns-cmd — tool notes
 
-EdgeCommons **UNS command-line tool** (Rust). Repo/crate/bin `uns-cmd`. Depends on the
+EdgeCommons **UNS command-line tool** (Rust). Repo/crate/bin `ec-uns-cmd`. Depends on the
 `edgecommons` Rust library. Read the org umbrella `../AGENTS.md` first (platform matrix, validation
 infra, local-dev sibling override).
 
@@ -10,14 +10,14 @@ A standalone ecosystem utility that sends a command to any EdgeCommons component
 the UNS and prints the correlated reply. The UNS `cmd` wire is a protobuf (prost) envelope, so this
 tool builds the proper `cmd/{verb}` request envelope through the library, publishes it on the
 component's UNS command topic, and awaits the correlated reply. It is general: every component has a
-library-owned `commands()` inbox, so `uns-cmd` drives the built-ins (`ping`, `describe`, `status`,
+library-owned `commands()` inbox, so `ec-uns-cmd` drives the built-ins (`ping`, `describe`, `status`,
 `reload-config`, `get-configuration`) and any component verb (`sb/*`, …) with an arbitrary JSON body.
 
 ## How it works (the real library APIs it uses)
 
 It reuses the exact client request path the edge-console command gateway uses:
 
-- **Client runtime.** `EdgeCommonsBuilder::new("uns-cmd").args([...]).build().await` stands up a
+- **Client runtime.** `EdgeCommonsBuilder::new("ec-uns-cmd").args([...]).build().await` stands up a
   HOST/MQTT `EdgeCommons` runtime. The tool synthesizes two throwaway config files for its own
   client identity — a standalone messaging config (`{"messaging":{"local":{host,port,clientId}}}`,
   optional TLS `credentials`) and a minimal component config (heartbeat disabled) — and feeds them
@@ -60,5 +60,5 @@ cargo test          # 23 unit tests + 1 self-skipping live round-trip
 ```
 
 Live command-surface E2E: bring up a component (e.g. the `ethernet-ip-adapter` sim) against a local
-EMQX (`docker start edgecommons-emqx`), then drive it with `uns-cmd` (`sb/status`, `sb/pause`/
+EMQX (`docker start edgecommons-emqx`), then drive it with `ec-uns-cmd` (`sb/status`, `sb/pause`/
 `sb/resume`, `sb/read`, `sb/write`, `describe`).

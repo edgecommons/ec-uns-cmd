@@ -1,6 +1,6 @@
-//! # uns-cmd — binary entry point
+//! # ec-uns-cmd — binary entry point
 //!
-//! Wires the pure logic in [`uns_cmd`] to a live EdgeCommons client runtime: it stands up an
+//! Wires the pure logic in [`ec_uns_cmd`] to a live EdgeCommons client runtime: it stands up an
 //! `EdgeCommons` HOST/MQTT runtime (the same client bring-up the edge-console gateway uses),
 //! builds the protobuf `cmd/{verb}` request envelope through the library's `MessageBuilder`,
 //! publishes it on the target's UNS command topic, and awaits the correlated reply via
@@ -25,7 +25,7 @@ use edgecommons::messaging::message::MessageBuilder;
 use serde_json::{Value, json};
 use tempfile::NamedTempFile;
 
-use uns_cmd::{
+use ec_uns_cmd::{
     Cli, ExitCode, ReplyOutcome, classify_request_error, client_config_doc, cmd_topic,
     interpret_reply, messaging_config_doc, parse_body, parse_broker,
 };
@@ -41,7 +41,7 @@ fn main() -> ProcExitCode {
     {
         Ok(rt) => rt,
         Err(e) => {
-            eprintln!("uns-cmd: failed to start async runtime: {e}");
+            eprintln!("ec-uns-cmd: failed to start async runtime: {e}");
             return ProcExitCode::from(ExitCode::RequestFailed.code() as u8);
         }
     };
@@ -57,7 +57,7 @@ async fn run(cli: Cli) -> ExitCode {
         Ok(exit) => exit,
         Err(e) => {
             // Argument/topic/body construction failures land here (broker-independent).
-            eprintln!("uns-cmd: {e:#}");
+            eprintln!("ec-uns-cmd: {e:#}");
             ExitCode::RequestFailed
         }
     }
@@ -89,7 +89,7 @@ async fn try_run(cli: &Cli) -> anyhow::Result<ExitCode> {
     // 2. Synthesize the tool's own client config files (kept alive until after build()).
     let level = if cli.verbose { "DEBUG" } else { "WARN" };
     let client_cfg = write_temp_json(
-        "uns-cmd-config",
+        "ec-uns-cmd-config",
         &client_config_doc(&cli.client_component, level),
     )?;
 
@@ -107,13 +107,13 @@ async fn try_run(cli: &Cli) -> anyhow::Result<ExitCode> {
                 cli.cert.as_deref(),
                 cli.key.as_deref(),
             );
-            TempOrPath::Temp(write_temp_json("uns-cmd-messaging", &doc)?)
+            TempOrPath::Temp(write_temp_json("ec-uns-cmd-messaging", &doc)?)
         }
     };
 
     // 3. Stand up the EdgeCommons client runtime via the standard CLI contract.
     let argv: Vec<String> = vec![
-        "uns-cmd".to_string(),
+        "ec-uns-cmd".to_string(),
         "--platform".to_string(),
         "HOST".to_string(),
         "--transport".to_string(),
@@ -127,11 +127,11 @@ async fn try_run(cli: &Cli) -> anyhow::Result<ExitCode> {
     ];
 
     tracing::debug!(topic = %topic, broker = %cli.broker, "connecting to broker");
-    let gg = match EdgeCommonsBuilder::new("uns-cmd").args(argv).build().await {
+    let gg = match EdgeCommonsBuilder::new("ec-uns-cmd").args(argv).build().await {
         Ok(gg) => Arc::new(gg),
         Err(e) => {
             eprintln!(
-                "uns-cmd: could not connect / bring up the client runtime: {e}\n\
+                "ec-uns-cmd: could not connect / bring up the client runtime: {e}\n\
                  (is the broker reachable at {}?)",
                 cli.broker
             );
@@ -166,10 +166,10 @@ async fn try_run(cli: &Cli) -> anyhow::Result<ExitCode> {
             let code = classify_request_error(&e.to_string());
             match code {
                 ExitCode::Timeout => eprintln!(
-                    "uns-cmd: no reply from ecv1/{}/{} for '{}' within {}s",
+                    "ec-uns-cmd: no reply from ecv1/{}/{} for '{}' within {}s",
                     cli.device, cli.component, cli.verb, cli.timeout
                 ),
-                _ => eprintln!("uns-cmd: request failed: {e}"),
+                _ => eprintln!("ec-uns-cmd: request failed: {e}"),
             }
             code
         }
@@ -197,7 +197,7 @@ fn emit_reply(cli: &Cli, body: &Value) -> ExitCode {
             if !cli.json {
                 print_json_err(&json!({ "code": code, "message": message }));
             }
-            eprintln!("uns-cmd: command '{}' failed: {code}: {message}", cli.verb);
+            eprintln!("ec-uns-cmd: command '{}' failed: {code}: {message}", cli.verb);
             ExitCode::CommandError
         }
         ReplyOutcome::Malformed(value) => {
@@ -205,7 +205,7 @@ fn emit_reply(cli: &Cli, body: &Value) -> ExitCode {
                 print_json_err(&value);
             }
             eprintln!(
-                "uns-cmd: reply was not the {{ok, result|error}} shape (component '{}')",
+                "ec-uns-cmd: reply was not the {{ok, result|error}} shape (component '{}')",
                 cli.component
             );
             ExitCode::MalformedReply

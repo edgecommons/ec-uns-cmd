@@ -1,4 +1,4 @@
-# EdgeCommons UNS Command Tool — `uns-cmd`.
+# EdgeCommons UNS Command Tool — `ec-uns-cmd`.
 #
 # A standalone ecosystem utility: send a command to ANY EdgeCommons component's `cmd`
 # inbox over the UNS (the real protobuf request/reply wire) and print the correlated
@@ -6,7 +6,7 @@
 # — a git-pinned `rev`, with a gitignored `.cargo/config.toml` `[patch]` redirecting the
 # dep to the local sibling checkout for development. CI builds the pinned rev.
 [package]
-name = "uns-cmd"
+name = "ec-uns-cmd"
 version = "0.1.0"
 edition = "2021"
 # Matches the edgecommons library's MSRV (edition-2024 crate).
@@ -16,11 +16,11 @@ description = "EdgeCommons UNS command-line tool: send a command to any componen
 publish = false
 
 [[bin]]
-name = "uns-cmd"
+name = "ec-uns-cmd"
 path = "src/main.rs"
 
 [lib]
-name = "uns_cmd"
+name = "ec_uns_cmd"
 path = "src/lib.rs"
 
 # Runtime selection mirrors the edgecommons library and the reference adapters:

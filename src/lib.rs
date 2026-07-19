@@ -1,13 +1,13 @@
-//! # uns-cmd — reusable EdgeCommons UNS command sender (library core)
+//! # ec-uns-cmd — reusable EdgeCommons UNS command sender (library core)
 //!
-//! **One-liner purpose**: the pure, broker-free logic behind the `uns-cmd` binary — CLI
+//! **One-liner purpose**: the pure, broker-free logic behind the `ec-uns-cmd` binary — CLI
 //! surface, UNS `cmd/{verb}` request-topic construction, request-body parsing, and reply
 //! interpretation. The [`crate`] binary ([`main`](../main.rs)) wires these to a live
 //! EdgeCommons runtime; everything here is unit-testable without a broker.
 //!
 //! ## What the tool does
 //! The EdgeCommons UNS `cmd` wire is a protobuf (prost) envelope, so operators and tests
-//! cannot drive a component's commands with raw JSON over MQTT. `uns-cmd` builds the proper
+//! cannot drive a component's commands with raw JSON over MQTT. `ec-uns-cmd` builds the proper
 //! protobuf `cmd` request envelope through the library's [`MessageBuilder`], publishes it on
 //! the component's UNS command topic
 //! (`ecv1/{device}/{component}[/{instance}]/cmd/{verb}`, per the UNS grammar D-U28), and
@@ -39,9 +39,9 @@ pub const DEFAULT_MQTTS_PORT: u16 = 8883;
 /// The default request deadline in seconds.
 pub const DEFAULT_TIMEOUT_SECS: u64 = 10;
 /// The tool's own default UNS component token (its client identity).
-pub const DEFAULT_CLIENT_COMPONENT: &str = "uns-cmd";
+pub const DEFAULT_CLIENT_COMPONENT: &str = "ec-uns-cmd";
 /// The tool's own default device (thing) identity.
-pub const DEFAULT_CLIENT_DEVICE: &str = "uns-cmd";
+pub const DEFAULT_CLIENT_DEVICE: &str = "ec-uns-cmd";
 
 /// Send a command to an EdgeCommons component's `cmd` inbox over the UNS and print the reply.
 ///
@@ -51,7 +51,7 @@ pub const DEFAULT_CLIENT_DEVICE: &str = "uns-cmd";
 /// `result` (or `error`) as JSON. Works for any component and any verb.
 #[derive(Debug, Parser)]
 #[command(
-    name = "uns-cmd",
+    name = "ec-uns-cmd",
     about = "Send a command to an EdgeCommons component's cmd inbox over the UNS and print the reply.",
     version
 )]
@@ -528,10 +528,10 @@ mod tests {
             host: "localhost".into(),
             port: 1883,
         };
-        let doc = messaging_config_doc(&b, "uns-cmd-1", false, None, None, None);
+        let doc = messaging_config_doc(&b, "ec-uns-cmd-1", false, None, None, None);
         assert_eq!(doc["messaging"]["local"]["host"], "localhost");
         assert_eq!(doc["messaging"]["local"]["port"], 1883);
-        assert_eq!(doc["messaging"]["local"]["clientId"], "uns-cmd-1");
+        assert_eq!(doc["messaging"]["local"]["clientId"], "ec-uns-cmd-1");
         assert!(doc["messaging"]["local"].get("credentials").is_none());
     }
 
@@ -543,7 +543,7 @@ mod tests {
         };
         let doc = messaging_config_doc(
             &b,
-            "uns-cmd-2",
+            "ec-uns-cmd-2",
             true,
             Some("ca.pem"),
             Some("c.pem"),
@@ -557,9 +557,9 @@ mod tests {
 
     #[test]
     fn client_config_disables_heartbeat_and_sets_token() {
-        let doc = client_config_doc("uns-cmd", "WARN");
+        let doc = client_config_doc("ec-uns-cmd", "WARN");
         assert_eq!(doc["heartbeat"]["enabled"], false);
-        assert_eq!(doc["component"]["token"], "uns-cmd");
+        assert_eq!(doc["component"]["token"], "ec-uns-cmd");
         assert_eq!(doc["logging"]["level"], "WARN");
     }
 
@@ -567,7 +567,7 @@ mod tests {
     #[test]
     fn cli_parses_minimal_invocation() {
         let cli = Cli::try_parse_from([
-            "uns-cmd",
+            "ec-uns-cmd",
             "--broker",
             "localhost:1883",
             "--device",
@@ -588,7 +588,7 @@ mod tests {
     #[test]
     fn cli_parses_full_invocation() {
         let cli = Cli::try_parse_from([
-            "uns-cmd",
+            "ec-uns-cmd",
             "--broker",
             "emqx:8883",
             "--tls",
@@ -619,9 +619,9 @@ mod tests {
 
     #[test]
     fn cli_requires_device_component_and_verb() {
-        assert!(Cli::try_parse_from(["uns-cmd", "ping"]).is_err()); // no device/component
+        assert!(Cli::try_parse_from(["ec-uns-cmd", "ping"]).is_err()); // no device/component
         assert!(
-            Cli::try_parse_from(["uns-cmd", "--device", "d", "--component", "c"]).is_err()
+            Cli::try_parse_from(["ec-uns-cmd", "--device", "d", "--component", "c"]).is_err()
         ); // no verb
     }
 }

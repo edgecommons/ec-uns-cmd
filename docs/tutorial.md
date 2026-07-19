@@ -1,16 +1,16 @@
 # Tutorial: your first command over the bus
 
-This tutorial drives a live EdgeCommons component with `uns-cmd`. By the end you send `ping`,
+This tutorial drives a live EdgeCommons component with `ec-uns-cmd`. By the end you send `ping`,
 discover a component's verbs with `describe`, and read a southbound adapter's status — all over the
 real protobuf UNS command wire.
 
 You need a Rust toolchain, an MQTT broker, and one EdgeCommons component to talk to.
 
-## 1. Build uns-cmd
+## 1. Build ec-uns-cmd
 
 ```bash
 cargo build --release
-# binary at target/release/uns-cmd
+# binary at target/release/ec-uns-cmd
 ```
 
 ## 2. Start a broker
@@ -39,7 +39,7 @@ The adapter's device (thing) identity is `plant-line1`, its component token is
 `ping` asks the component whether it is responsive and returns its uptime:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter ping
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter ping
 ```
 
 ```json
@@ -49,7 +49,7 @@ uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-ada
 }
 ```
 
-`uns-cmd` built the topic `ecv1/plant-line1/ethernet-ip-adapter/cmd/ping`, published a protobuf
+`ec-uns-cmd` built the topic `ecv1/plant-line1/ethernet-ip-adapter/cmd/ping`, published a protobuf
 `cmd` envelope with a generated reply topic, and printed the correlated reply. The exit code is `0`.
 
 ## 5. Discover its verbs
@@ -57,7 +57,7 @@ uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-ada
 `describe` returns the component's command verbs and its console panels:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter describe
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter describe
 ```
 
 ```json
@@ -73,14 +73,14 @@ uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-ada
 }
 ```
 
-Every verb listed here is one you can send with `uns-cmd`.
+Every verb listed here is one you can send with `ec-uns-cmd`.
 
 ## 6. Ask a southbound adapter for status
 
 `sb/status` returns the adapter's per-instance connectivity and metrics:
 
 ```bash
-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/status
+ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter sb/status
 ```
 
 ```json

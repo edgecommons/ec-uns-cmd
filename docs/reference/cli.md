@@ -1,10 +1,10 @@
 # CLI reference
 
 ```text
-uns-cmd [OPTIONS] --device <DEVICE> --component <COMPONENT> <VERB>
+ec-uns-cmd [OPTIONS] --device <DEVICE> --component <COMPONENT> <VERB>
 ```
 
-`uns-cmd` connects to an MQTT broker as an EdgeCommons client, builds the protobuf `cmd/{verb}`
+`ec-uns-cmd` connects to an MQTT broker as an EdgeCommons client, builds the protobuf `cmd/{verb}`
 request envelope, publishes it on the target's UNS command topic, awaits the correlated reply within
 the deadline, and prints the reply's `result` (or `error`) as JSON.
 
@@ -30,8 +30,8 @@ the deadline, and prints the reply's `result` (or `error`) as JSON.
 | `--body <JSON>` | `{}` | The request body as a JSON **object**. A non-object (array, scalar, string) or invalid JSON is a usage error. |
 | `--timeout <SECS>` | `10` | The request deadline in seconds. No reply within it exits `4`. |
 | `--json` | off | Print the full reply body `{ok, result|error}` instead of just the `result`/`error` object. |
-| `--client-component <TOKEN>` | `uns-cmd` | The tool's own UNS component token (its client identity — the sender stamped on the request). |
-| `--client-device <NAME>` | `uns-cmd` | The tool's own device (thing) identity. |
+| `--client-component <TOKEN>` | `ec-uns-cmd` | The tool's own UNS component token (its client identity — the sender stamped on the request). |
+| `--client-device <NAME>` | `ec-uns-cmd` | The tool's own device (thing) identity. |
 | `-v`, `--verbose` | off | Verbose library/tool logging on stderr (default: warnings only). |
 | `-h`, `--help` | — | Print help. |
 | `-V`, `--version` | — | Print the version. |
@@ -40,7 +40,7 @@ The `RUST_LOG` environment variable overrides the log filter when set.
 
 ## The request topic
 
-`uns-cmd` builds `ecv1/{device}/{component}[/{instance}]/cmd/{verb}` through the EdgeCommons UNS
+`ec-uns-cmd` builds `ecv1/{device}/{component}[/{instance}]/cmd/{verb}` through the EdgeCommons UNS
 topic builder. The instance slot is optional (UNS D-U28): omit `--instance` for a component-scoped
 command, which every component's inbox also serves. The topic is validated at build time — a bad
 device/component/instance/verb token fails before any network I/O.
@@ -56,9 +56,9 @@ the tool's own `identity` plus a generated `reply_to` reply topic. The library s
 
 The reply body is the inbox's structured shape:
 
-- Success — `{"ok": true, "result": <object>}`. `uns-cmd` prints `result` (or the full body with
+- Success — `{"ok": true, "result": <object>}`. `ec-uns-cmd` prints `result` (or the full body with
   `--json`) and exits `0`.
-- Coded failure — `{"ok": false, "error": {"code": <CODE>, "message": <text>}}`. `uns-cmd` prints
+- Coded failure — `{"ok": false, "error": {"code": <CODE>, "message": <text>}}`. `ec-uns-cmd` prints
   `error` to stderr and exits `1`.
 
 ## Exit codes
