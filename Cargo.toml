@@ -1,0 +1,50 @@
+# EdgeCommons UNS Command Tool — `uns-cmd`.
+#
+# A standalone ecosystem utility: send a command to ANY EdgeCommons component's `cmd`
+# inbox over the UNS (the real protobuf request/reply wire) and print the correlated
+# reply. It depends on the EdgeCommons Rust library exactly the way a component repo does
+# — a git-pinned `rev`, with a gitignored `.cargo/config.toml` `[patch]` redirecting the
+# dep to the local sibling checkout for development. CI builds the pinned rev.
+[package]
+name = "uns-cmd"
+version = "0.1.0"
+edition = "2021"
+# Matches the edgecommons library's MSRV (edition-2024 crate).
+rust-version = "1.85"
+license = "BUSL-1.1"
+description = "EdgeCommons UNS command-line tool: send a command to any component's cmd inbox over the UNS and print the reply."
+publish = false
+
+[[bin]]
+name = "uns-cmd"
+path = "src/main.rs"
+
+[lib]
+name = "uns_cmd"
+path = "src/lib.rs"
+
+# Runtime selection mirrors the edgecommons library and the reference adapters:
+#   - `standalone` (default): dual-broker MQTT — runs on a laptop/container, no C
+#     toolchain. This is the transport the tool always uses (it is an MQTT client).
+#   - `greengrass`: pulled in only so the dep graph can compile the Greengrass IPC seam
+#     when someone wants to drive an on-device inbox from the same host; Linux-only.
+[features]
+default = ["standalone"]
+standalone = ["edgecommons/standalone"]
+greengrass = ["edgecommons/greengrass"]
+
+[dependencies]
+# The edgecommons Rust library — pinned by git rev (the same rev the reference components
+# pin). The gitignored `.cargo/config.toml` patches this to the local sibling checkout for
+# dev; CI builds the pinned rev.
+edgecommons = { git = "https://github.com/edgecommons/edgecommons", rev = "91d93d8bca6400615db6f64f6120efc55fc75a1a", default-features = false }
+clap = { version = "4", features = ["derive"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "time"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tempfile = "3"
+
+[dev-dependencies]
+serde_json = "1"
