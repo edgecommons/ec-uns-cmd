@@ -23,7 +23,9 @@ deadline, and prints the reply's `result` or `error` as JSON.
 
 A reply body is one of:
 
-```json
+Illustrative JSON fragment; omitted fields and surrounding object context are not shown. This is not a complete input document.
+
+```text
 { "ok": true, "result": { … } }
 ```
 
