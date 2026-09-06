@@ -60,7 +60,9 @@ ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-
 ec-uns-cmd --broker localhost:1883 --device plant-line1 --component ethernet-ip-adapter describe
 ```
 
-```json
+Illustrative JSON fragment; omitted fields and surrounding object context are not shown. This is not a complete input document.
+
+```text
 {
   "commands": [
     { "verb": "ping", "builtIn": true },

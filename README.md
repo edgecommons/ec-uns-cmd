@@ -26,6 +26,12 @@ It works for arbitrary verbs and arbitrary JSON bodies — the library built-ins
 `describe`, `status`, `reload-config`, `get-configuration`) and any component verb
 (`sb/status`, `sb/read`, `sb/write`, …).
 
+This requires a CommandsRegistry `{ok, result|error}` reply. The ConfigComponent rendezvous at
+`ecv1/{device}/config/cmd/get-configuration` returns a bare lineage bundle and is a different
+service contract: use its [protobuf client tutorial](https://github.com/edgecommons/config-component/blob/main/docs/tutorial.md)
+instead. The tool reports exit code 5 for replies without the registry wrapper. `--body` accepts
+native JSON command arguments, not a JSON-encoded wire envelope.
+
 ## Install
 
 `ec-uns-cmd` is a Rust binary crate. It depends on the EdgeCommons Rust library by a pinned git
@@ -42,7 +48,7 @@ one for the reference layout):
 
 ```toml
 [patch."https://github.com/edgecommons/edgecommons"]
-edgecommons = { path = "../edgecommons/core/libs/rust" }
+edgecommons = { path = "../core/libs/rust" }
 
 [net]
 git-fetch-with-cli = true

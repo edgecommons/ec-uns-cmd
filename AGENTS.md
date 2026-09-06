@@ -45,7 +45,7 @@ It reuses the exact client request path the edge-console command gateway uses:
 ## Conventions
 
 - **Depends on `edgecommons` by pinned git `rev`** (same rev the reference components pin). A
-  gitignored `.cargo/config.toml` patches it to `../edgecommons/core/libs/rust` for dev; CI uses the
+  gitignored `.cargo/config.toml` patches it to `../core/libs/rust` for dev; CI uses the
   pinned rev. Do NOT edit `.cargo/config.toml` or the pin as part of feature work.
 - **Default feature `standalone`** (dual-broker MQTT). The tool is always an MQTT client.
 - **stdout is the reply JSON only**; logs go to stderr (pipe-friendly).
